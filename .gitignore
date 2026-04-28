@@ -1,0 +1,29 @@
+# Build and simulation artifacts
+/build/
+/build/**
+/build/*
+/rtl_trace.log
+/spike_trace.log
+/results/
+/obj_dir/
+/*.bin
+/*.elf
+/*.map
+/*.hex
+
+# Editor and environment files
+.vscode/
+.devcontainer/
+*.swp
+*.swo
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,47 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /tmp/ccz7OCyw.o
+                0x0000000080000000                . = 0x80000000
+
+.text           0x0000000080000000       0x44
+ *(.text*)
+ .text          0x0000000080000000       0x44 /tmp/ccz7OCyw.o
+                0x0000000080000000                _start
+ *(.rodata*)
+
+.data           0x0000000080000044        0x0
+ *(.data*)
+ .data          0x0000000080000044        0x0 /tmp/ccz7OCyw.o
+
+.bss            0x0000000080000044        0x0
+ *(.bss*)
+ .bss           0x0000000080000044        0x0 /tmp/ccz7OCyw.o
+ *(COMMON)
+OUTPUT(build/test_basic.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x0000000000000000       0x1f
+ .riscv.attributes
+                0x0000000000000000       0x1f /tmp/ccz7OCyw.o
+
+.debug_line     0x0000000000000000       0xa1
+ .debug_line    0x0000000000000000       0xa1 /tmp/ccz7OCyw.o
+
+.debug_info     0x0000000000000000       0x26
+ .debug_info    0x0000000000000000       0x26 /tmp/ccz7OCyw.o
+
+.debug_abbrev   0x0000000000000000       0x14
+ .debug_abbrev  0x0000000000000000       0x14 /tmp/ccz7OCyw.o
+
+.debug_aranges  0x0000000000000000       0x20
+ .debug_aranges
+                0x0000000000000000       0x20 /tmp/ccz7OCyw.o
+
+.debug_str      0x0000000000000000       0x3c
+ .debug_str     0x0000000000000000       0x3c /tmp/ccz7OCyw.o
