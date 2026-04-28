@@ -1,30 +1,219 @@
-# Build and simulation artifacts
-/build/
-/build/**
-/build/*
-/rtl_trace.log
-/spike_trace.log
-/results/
-/obj_dir/
-/*.bin
-/*.elf
-/*.map
-/*.hex
+# VerCore Project .gitignore
+# This file excludes build artifacts, tools, and large files from version control
 
-# Editor and environment files
+# ==============================================================================
+# BUILD & TEMPORARY FILES
+# ==============================================================================
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+/build
+**/build/
+dist/
+**/dist/
+target/
+
+# Object files
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.elf.map
+*.map
+
+# ==============================================================================
+# SIMULATION & VERIFICATION OUTPUTS
+# ==============================================================================
+# Verilator generated files
+obj_dir/
+**/obj_dir/
+*.sc
+*_sc.cpp
+
+# Trace files (usually large)
+*.vcd
+*.fst
+*.gtkw
+rtl_trace.log
+spike_trace.log
+rtl_trace_*.log
+
+# Simulation logs
+sim_*.log
+simv
+simv.daidir
+csrc/
+
+# ==============================================================================
+# EDA TOOL OUTPUTS (Large & Auto-Generated)
+# ==============================================================================
+# Yosys synthesis
+*.json
+yosys_*.log
+synth/
+
+# OpenROAD outputs
+results/
+logs/
+**/.openroad.log
+**/*.odb
+**/*.def
+**/*.gds
+**/*.gdsii
+**/*.lef
+
+# Vivado/ISE
+*.bit
+*.bitz
+*.runs/
+*.cache/
+*.ip_user_files/
+*.sim/
+**/.Xil/
+
+# ==============================================================================
+# IDE & EDITOR FILES
+# ==============================================================================
 .vscode/
-.devcontainer/
+.idea/
 *.swp
 *.swo
-
-# Python artifacts
-__pycache__/
-*.pyc
-
-# Logs
-*.log
-
-# OS files
+*~
 .DS_Store
-Thumbs.db
+.project
+.cproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==============================================================================
+# TOOLS & DEPENDENCIES (NOT IN REPO)
+# ==============================================================================
+# These are excluded because they are:
+# 1. Large (>1GB each)
+# 2. Platform-specific
+# 3. Easily installable via package managers or scripts
+
 vercore_sandbox/tools/
+tools/
+**/tools/
+
+# Debian packages
+*.deb
+*.dsc
+*.orig.tar.gz
+
+# Downloaded binaries
+*.tar.gz
+*.tgz
+*.zip
+*.tar.xz
+prebuilt/
+
+# ==============================================================================
+# LARGE EXTERNAL DEPENDENCIES
+# ==============================================================================
+# These directories contain large vendored tools/libraries
+# See EXCLUDED_LARGE_FILES.md for details
+
+# LLVM/Clang
+llvm-project/
+llvm-build/
+
+# OpenROAD (when built locally - use submodule instead)
+OpenROAD-build/
+
+# GCC/Binutils
+gcc-build/
+binutils-build/
+
+# Verilator (when built locally)
+verilator-build/
+
+# ==============================================================================
+# GENERATED DOCUMENTATION
+# ==============================================================================
+*.pdf
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# ==============================================================================
+# TEMPORARY/EXPERIMENTAL FILES
+# ==============================================================================
+*.tmp
+*.bak
+*.backup
+*.old
+test_tmp/
+tmp/
+temp/
+
+# Experimental branches
+experimental/
+poc/
+wip/
+
+# ==============================================================================
+# SENSITIVE/CONFIDENTIAL
+# ==============================================================================
+*.secret
+*.key
+*.pem
+config.local
+secrets.env
+.env
+.env.local
+
+# ==============================================================================
+# CUSTOM ENTRIES
+# ==============================================================================
+# Add project-specific exclusions below:
+
+# Large waveform files
+*.wave
+*.dump
+*.gtkw
+
+# Temporary test outputs
+rtl_results/
+spike_results/
+test_outputs/
+
+# Cache from analysis tools
+.cache/
+*.cache
+
+# git-related
+.gitmodules.local
