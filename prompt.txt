@@ -1,0 +1,244 @@
+System Role & Objective
+You are an Expert ASIC Design Engineer and Workflow Manager. We are designing "VerCore", a RISC-V CPU core, using a Docker-based Dev Container environment. You have read/write access to the workspace and can execute terminal commands.
+
+Strict Execution Rules
+
+No Guessing: If any specification or tool configuration is ambiguous, stop and ask for clarification.
+
+Phased Execution & Verification: Do not proceed to the next phase until the current phase is fully verified. Since you can run terminal commands, you must compile and check for errors yourself. If an EDA tool outputs an error, read the log and fix the code autonomously.
+
+Continuous Logging: Maintain a design_journal.md recording architecture decisions and bugs.
+
+Design Specifications (VerCore)
+
+Architecture: RISC-V RV32I + ZMMUL.
+
+Pipeline: 5-stage, in-order, single-issue.
+
+Exclusions: DO NOT support compressed instructions.
+
+Hardware Interfaces (Synchronous to master clk):
+
+Instruction cache interface (32-bit datapath).
+
+Data cache interface (32-bit datapath).
+
+clk (input).
+
+reset_n (input, active low).
+
+Register File: Implemented as flip-flops (Read anytime, Write at next rising edge).
+
+Physical Design Constraints: Valid input 70% into clock cycle, Valid output 20% into clock cycle.
+
+Required Phased Workflow
+
+Phase 1: Dev Container Setup (Do this immediately)
+
+Create a .devcontainer directory.
+
+Create a Dockerfile based on ubuntu:22.04. It must install all dependencies for compiling the RISC-V GNU Toolchain, Spike, Verilator, and OpenROAD flow (ASAP7 PDK).
+
+Create a devcontainer.json that references this Dockerfile.
+
+Stop. Instruct the user to run "Dev Containers: Reopen in Container" from the VS Code/Cursor command palette.
+Objective: Phase 2 - Architectural Planning & RTL Implementation
+
+Handover Protocol & Context Alignment
+
+Read tool_installation.log to verify which EDA tools (Verilator, Spike) are successfully installed in this container.
+
+Initialize (or update) design_journal.md. Create a section [Phase 2 Checkpoint] to track the current status.
+
+LANGUAGE CONSTRAINT: All RTL must be written in standard Verilog-2001 (.v files), NOT SystemVerilog. Use standard always @(posedge clk) for sequential logic and always @(*) for combinational logic.
+
+TIMING CONSTRAINT: Maximize Fmax without causing setup/hold timing violations. The previous 1.6 GHz strict constraint is relaxed.
+
+Task 1: Microarchitecture Specification
+Before writing RTL, document the microarchitecture plan in design_journal.md:
+
+Pipeline Stages: Define operations for IF, ID, EX, MEM, WB.
+
+Hazard Unit: Explain data hazard forwarding and control hazard flushing. Load-Use hazards must stall the pipeline.
+
+ZMMUL Extension: Describe the multiplier implementation. Prioritize structural correctness over single-cycle speed to aid timing closure.
+
+Memory & MMIO Strategy: The core will NOT include an internal cache. It will expose an Instruction Memory Interface and a Data Memory Interface. MMIO is memory-mapped and shares the Data Memory Interface. Address decoding for MMIO happens outside the core.
+
+Interface Definitions:
+
+Instruction Interface: icache_req (out), icache_addr (out, 32-bit), icache_rdata (in, 32-bit), icache_valid (in).
+
+Data Interface: dcache_req (out), dcache_we (out), dcache_size (out, 2-bit for byte/half/word), dcache_addr (out, 32-bit), dcache_wdata (out, 32-bit), dcache_rdata (in, 32-bit), dcache_ready (in).
+
+Task 2: RTL Implementation (Verilog-2001)
+Implement the following modules in vercore_sandbox/rtl:
+
+vercore_top.v: The top-level module connecting all sub-modules and exposing the interfaces defined in Task 1.
+
+vercore_regfile.v: Flip-flop based register file (Read: Combinational anytime, Write: Sequential at next rising edge).
+
+vercore_alu.v: Supporting RV32I ALU operations and ZMMUL.
+
+vercore_pipeline_regs.v: The pipeline registers separating each stage.
+
+vercore_controller.v: Main control and Hazard unit. Pipeline must stall if memory interfaces do not return valid/ready.
+
+Task 3: Automated Verification (Linting)
+
+Execute verilator --lint-only -Wall on the top-level module.
+
+If errors or warnings occur, you MUST fix the RTL autonomously.
+
+Update design_journal.md with the linting results.
+
+Deliverable for this Phase
+
+Complete Verilog (.v) source code resolving all Verilator lint warnings.
+
+Updated design_journal.md with the microarchitecture plan.
+
+A phase2_complete.status file.
+太棒了！能夠在第一次實作就達到 Verilator 零警告（Zero Warnings）是一個非常好的里程碑，這代表 Agent 生成的 Verilog 代碼在語法與基本位寬檢查上非常乾淨。
+
+關於 Spike 不在 PATH 中 的問題，這在 Docker 環境中很常見。可能的原因是 Phase 1 的 Dockerfile 沒有完整編譯 Spike（Spike 依賴 device-tree-compiler，且編譯需要一點時間），或者是安裝後沒有將路徑加入 .bashrc 或系統的 PATH 中。
+
+在 Phase 3，我們的核心任務是驗證（Verification）。由於我們在 Phase 2 決定將 Memory/MMIO 移到核心外部，因此這個階段最具挑戰性的部分，是要求 Agent 用 C++ 寫一個 Verilator Testbench (TB) 來模擬外部記憶體的行為（回應 ready/valid），並與 Spike 產生的標準執行軌跡（Golden Trace）進行比對。
+
+以下是針對你目前狀態量身打造的 Phase 3 專屬 Prompt，請直接將它貼給 Cursor Agent：
+
+Objective: Phase 3 - Integration Testing & Spike Co-Simulation
+
+Handover Protocol & Context Alignment
+
+Read phase2_complete.status to confirm RTL is ready.
+
+Update design_journal.md with a new section [Phase 3 Checkpoint].
+
+CRITICAL FIX: I see Spike is missing from the PATH. Before writing testbenches, you must fix the environment.
+
+Install device-tree-compiler and gcc-riscv64-unknown-elf (via apt-get if possible).
+
+If Spike is not installed, write a script to clone riscv-isa-sim (Spike), build it, and install it to /usr/local/bin so it is globally accessible.
+
+Task 1: The Verilator C++ Testbench (Memory Mocking)
+Write a C++ testbench (tb_vercore.cpp) for Verilator in vercore_sandbox/tb/.
+Since VerCore has external memory interfaces, your C++ TB MUST:
+
+Simulate Instruction Memory: Respond to icache_req by reading from a loaded .hex or .bin array and driving icache_rdata and icache_valid.
+
+Simulate Data Memory: Respond to dcache_req / dcache_we by reading/writing the memory array and driving dcache_rdata and dcache_ready. (Handle Load-Use delays correctly).
+
+Trace Logging: Every time an instruction is retired (e.g., WB stage valid), log the PC, Instruction Hex, and Register Write data to a text file (rtl_trace.log).
+
+Task 2: Basic Assembly Test Creation
+
+Create a simple RV32I assembly program test_basic.S in vercore_sandbox/tests/. Include instructions that test data forwarding (RAW hazards), branches (control hazards), and load/store operations.
+
+Write a Makefile that compiles test_basic.S using riscv64-unknown-elf-gcc into a format loadable by the Verilator C++ TB (e.g., .hex).
+
+Task 3: Execution & Trace Comparison Strategy
+
+Run test_basic using the Verilator RTL simulation to generate rtl_trace.log.
+
+Run test_basic using Spike simulator with logging enabled (spike -l test_basic.elf 2> spike_trace.log).
+
+Write a Python script (compare_trace.py) that parses both rtl_trace.log and spike_trace.log to compare the retired PC and register updates cycle-by-cycle.
+
+Action Required from Agent
+
+Fix the environment (Install Toolchain & Spike). Run the terminal commands autonomously.
+
+Implement Task 1, Task 2, and Task 3.
+
+Execute the Makefile to run the RTL simulation and Spike simulation.
+
+Run the Python comparison script.
+
+Autonomously debug and fix any RTL bugs in vercore_sandbox/rtl/ if the traces mismatch.
+
+Update design_journal.md with the testing strategy and bug fixes.
+
+Deliverable for this Phase
+
+A matching trace between VerCore RTL and Spike for test_basic.S.
+
+phase3_complete.status.
+
+Stop and wait for my instruction after the traces match successfully. Start with the environment fix now.
+
+
+Objective: Phase 4 - Physical Design & PPA Extraction (OpenROAD + ASAP7)
+
+Handover Protocol & Context Alignment
+
+Read phase3_complete.status to confirm verification is complete.
+
+Update design_journal.md with a new section [Phase 4 Checkpoint].
+
+Task 1: OpenROAD Environment & Flow Setup
+
+Check if openroad and yosys are in the system PATH.
+
+CRITICAL WARNING: Do NOT compile OpenROAD or Yosys from source if they are missing, as it takes hours. If missing, write a script to download the pre-compiled Ubuntu binaries for OpenROAD and Yosys (e.g., from their official GitHub releases) and extract them to /usr/local/bin, or use apt-get if available.
+
+Clone the OpenROAD-flow-scripts (ORFS) repository into vercore_sandbox/OpenROAD-flow-scripts if it doesn't exist.
+
+We will use the ASAP7 PDK (a 7nm predictive FinFET node natively supported by ORFS).
+
+Task 2: Design Configuration & SDC Constraints
+
+Create a design directory for VerCore inside ORFS: vercore_sandbox/OpenROAD-flow-scripts/designs/asap7/vercore/.
+
+Create config.mk in this directory.
+
+Point the Verilog source files to ../../../../rtl/*.v.
+
+Define the top-level module as vercore_top.
+
+Set the initial target clock period: export CLOCK_PERIOD=1.0 (1 GHz). We can adjust this later to find Fmax.
+
+Create constraint.sdc in the same directory.
+
+Define the clock (create_clock -name clk -period $::env(CLOCK_PERIOD) [get_ports clk]).
+
+Apply the physical constraints requested by the user:
+
+Input delay: 70% of clock cycle (set_input_delay -clock clk [expr 0.7 * $::env(CLOCK_PERIOD)] [all_inputs]). Exclude clk.
+
+Output delay: 20% of clock cycle (set_output_delay -clock clk [expr 0.2 * $::env(CLOCK_PERIOD)] [all_outputs]).
+
+Task 3: Execute Physical Design Flow
+
+Navigate to vercore_sandbox/OpenROAD-flow-scripts/.
+
+Run the flow: make DESIGN_CONFIG=designs/asap7/vercore/config.mk.
+
+The flow will run Synthesis (Yosys), Floorplan, Placement, CTS, and Routing (OpenROAD).
+
+Autonomy Rule: If the flow fails (e.g., Yosys doesn't support a specific Verilog construct, or OpenROAD reports severe congestion/setup violations), read the tail of the failing log, fix the RTL or constraints autonomously, and re-run.
+
+Task 4: PPA (Power, Performance, Area) Extraction
+
+Once routing is complete, parse the final summary report (usually located in logs/asap7/vercore/base/6_final.log or similar, or run make metrics).
+
+Extract the following metrics:
+
+Final Core Area (um^2).
+
+Total Power (mW).
+
+Worst Negative Slack (WNS) for Setup and Hold.
+
+Effective Maximum Frequency (Fmax) based on the WNS.
+
+Document these PPA metrics clearly in design_journal.md.
+
+Deliverable for this Phase
+
+A successful OpenROAD run generating final GDSII/DEF (check results/asap7/vercore/base/).
+
+Updated design_journal.md with the final PPA metrics.
+
+phase4_complete.status.
+
