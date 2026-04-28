@@ -217,3 +217,14 @@ test_outputs/
 
 # git-related
 .gitmodules.local
+
+# ==============================================================================
+# OpenROAD-flow-scripts SPECIFIC EXCLUSIONS
+# ==============================================================================
+# Keep only design configs, exclude all tools and artifacts
+vercore_sandbox/OpenROAD-flow-scripts/flow/
+vercore_sandbox/OpenROAD-flow-scripts/results/
+vercore_sandbox/OpenROAD-flow-scripts/logs/
+vercore_sandbox/OpenROAD-flow-scripts/tools/
+vercore_sandbox/OpenROAD-flow-scripts/pdk/
+vercore_sandbox/OpenROAD-flow-scripts/.openroad.log
