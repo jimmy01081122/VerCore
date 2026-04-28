@@ -20,7 +20,7 @@ A complete RISC-V CPU core design project featuring a 5-stage pipeline implement
   - Hardware multiplier (ZMMUL: MUL, MULH, MULHSU, MULHU)
   - Clean separation of concerns (core vs. memory subsystem)
 
-## 📋 Project Status
+## Project Status
 
 | Phase | Status | Deliverables |
 |-------|--------|--------------|
