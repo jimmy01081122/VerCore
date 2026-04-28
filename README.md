@@ -2,7 +2,7 @@
 
 A complete RISC-V CPU core design project featuring a 5-stage pipeline implementation optimized for hardware synthesis and silicon design. This project includes full RTL implementation, comprehensive verification testcases, and physical design flow using OpenROAD with ASAP7 7nm PDK.
 
-## 🏗️ Project Overview
+## Project Overview
 
 **VerCore** is an educational and production-oriented RISC-V processor core implementing:
 
@@ -24,12 +24,12 @@ A complete RISC-V CPU core design project featuring a 5-stage pipeline implement
 
 | Phase | Status | Deliverables |
 |-------|--------|--------------|
-| **Phase 1** | ✅ Complete | Dev Container setup (Docker) |
-| **Phase 2** | ✅ Complete | RTL implementation (Verilog-2001), lint-clean |
-| **Phase 3** | ✅ Complete | 11 comprehensive test cases, verification (270+ instructions) |
-| **Phase 4** | 🔄 In Progress | Physical design with OpenROAD + ASAP7 PDK |
+| **Phase 1** | Complete | Dev Container setup (Docker) |
+| **Phase 2** | Complete | RTL implementation (Verilog-2001), lint-clean |
+| **Phase 3** | Complete | 11 comprehensive test cases, verification (270+ instructions) |
+| **Phase 4** | In Progress | Physical design with OpenROAD + ASAP7 PDK |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -68,7 +68,7 @@ cd vercore_sandbox
 tail rtl_trace.log  # View execution trace
 ```
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 VerCore/
@@ -103,7 +103,7 @@ VerCore/
 └── README.md                   # This file
 ```
 
-## 🔧 RTL Implementation
+## RTL Implementation
 
 ### Core Modules
 
@@ -130,7 +130,7 @@ VerCore/
 
 5. **Verilog-2001 Compliance**: No SystemVerilog features used for maximum tool compatibility.
 
-## ✅ Verification
+## Verification
 
 ### Test Suite (11 Comprehensive Tests)
 
@@ -156,7 +156,7 @@ Each test exercises 20+ instructions covering:
 - **Verilator lint**: Zero warnings
 - **Functional coverage**: All RV32I + ZMMUL operations verified
 
-## 🎯 Physical Design (Phase 4)
+## Physical Design 
 
 ### OpenROAD Flow
 
@@ -183,13 +183,13 @@ make DESIGN_CONFIG=designs/asap7/vercore/config.mk
 - Setup Slack: TBD ps
 - Max Frequency: TBD GHz
 
-## 📚 Documentation
+## Documentation
 
 - **[design_journal.md](design_journal.md)** - Detailed design decisions, microarchitecture, and debug notes
 - **[DEPENDENCIES.md](DEPENDENCIES.md)** - Tool versions and installation instructions
 - **[EXCLUDED_LARGE_FILES.md](EXCLUDED_LARGE_FILES.md)** - Build artifacts and external tools not in repo
 
-## 🔧 Development Tools Required
+##  Development Tools Required
 
 | Tool | Version | Purpose |
 |------|---------|---------|
@@ -202,7 +202,7 @@ make DESIGN_CONFIG=designs/asap7/vercore/config.mk
 
 See [DEPENDENCIES.md](DEPENDENCIES.md) for detailed installation.
 
-## 📊 Performance Characteristics
+## Performance Characteristics
 
 ### Instruction Execution
 
@@ -226,7 +226,7 @@ Cycle 5:  WB[instr1]  MEM[instr2] EX[instr3]  ID[instr4]
 Cycle 6:           WB[instr2]  MEM[instr3] EX[instr4]
 ```
 
-## 🐛 Known Limitations & Future Work
+## Known Limitations & Future Work
 
 - No compressed instruction support (RVC)
 - No branch prediction (simple static prediction only)
@@ -234,7 +234,7 @@ Cycle 6:           WB[instr2]  MEM[instr3] EX[instr4]
 - No privilege levels (M-mode only)
 - Single-issue pipeline
 
-## 📝 Contributing
+## Contributing
 
 This is an educational/research project. For questions or contributions:
 
@@ -243,16 +243,16 @@ This is an educational/research project. For questions or contributions:
 3. RTL modifications should maintain Verilog-2001 compliance
 4. New tests should follow the format of existing test cases
 
-## 📄 License
+## License
 
 [Specify your license - e.g., MIT, Apache 2.0, or educational use]
 
-## 👤 Authors
+## Authors
 
-**Design Engineer**: AI ASIC Design Agent
-**Project Lead**: [Your Name]
+**Design Engineer**: ASIC Design 
+**Project Lead**: Jimmy
 
-## 🔗 Related Resources
+## Related Resources
 
 - [RISC-V ISA Specification](https://riscv.org/specifications/)
 - [Verilator Documentation](https://verilator.org/guide/)
